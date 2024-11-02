@@ -22,9 +22,6 @@ jobs:
       - run: yarn install
       - run: yarn build
 
-      - uses: peaceiris/actions-gh-pages@v3
+      - uses: JamesIves/github-pages-deploy-action@v4
         with:
-          deploy_key: ${{ secrets.DEPLOY_TOKEN }}
-          force_orphan: true
-          publish_branch: gh-pages
-          publish_dir: ./out
+          folder: out
