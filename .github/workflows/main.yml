@@ -5,9 +5,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 env:
   NEXT_TELEMETRY_DISABLED: 1
@@ -15,34 +13,19 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
+
+      - run: corepack enable
 
       - uses: actions/setup-node@v4
         with:
           node-version: "20.x"
 
-      - uses: actions/configure-pages@v4
-        with:
-          static_site_generator: next
-
       - run: yarn install
       - run: yarn build
+      - run: touch ./out/.nojekyll
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: JamesIves/github-pages-deploy-action@v4
         with:
-          path: ./out
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Publish to GitHub Pages 🚀
-        id: deployment
-        uses: actions/deploy-pages@v4
+          folder: out
