@@ -5,7 +5,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
 env:
   NEXT_TELEMETRY_DISABLED: 1
@@ -13,18 +15,36 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
 
-      - run: corepack enable
+      - name: Setup Node.js ⚙️ - Cache dependencies ⚡ - Install dependencies 🔧
+        uses: ./.github/workflows/setup-node
 
-      - uses: actions/setup-node@v4
+      - name: Setup Pages ⚙️
+        uses: actions/configure-pages@v4
         with:
-          node-version: "20.x"
+          static_site_generator: next
 
-      - run: yarn install
-      - run: yarn build
+      - name: Build with Next.js 🏗️
+        run: npx next build
 
-      - uses: JamesIves/github-pages-deploy-action@v4
+      - name: Upload artifact 📡
+        uses: actions/upload-pages-artifact@v3
         with:
-          folder: out
+          path: ./out
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Publish to GitHub Pages 🚀
+        id: deployment
+        uses: actions/deploy-pages@v4
